@@ -1,0 +1,50 @@
+<div id="Todo-Table">
+
+<h1>To-Do List</h1>
+
+<%= if @live_action in [:new, :edit] do %>
+  <.modal return_to={Routes.item_index_path(@socket, :index)}>
+    <.live_component
+      module={TodoWeb.ItemLive.FormComponent}
+      id={@item.id || :new}
+      title={@page_title}
+      action={@live_action}
+      item={@item}
+      return_to={Routes.item_index_path(@socket, :index)}
+    />
+  </.modal>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Priority</th>
+      <th>Completed?</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="items">
+    <%= for item <- @items do %>
+      <tr id={"item-#{item.id}"}>
+        <td><%= item.description %></td>
+        <td><%= item.priority %></td>
+
+        <%= if item.is_done == true do %>
+        <td><%= live_component @socket, TodoWeb.PillComponent, type: "confirm", content: "yes" %></td>
+        <% else %>
+        <td><%= live_component @socket, TodoWeb.PillComponent, type: "warning", content: "no" %></td>
+        <% end %>
+
+        <td>
+          <span><%= live_patch "Edit", to: Routes.item_index_path(@socket, :edit, item) %></span>
+          <span><%= link "Remove", to: "#", phx_click: "delete", phx_value_id: item.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= live_patch "Add New Item", to: Routes.item_index_path(@socket, :new) %></span>
+</div>
